@@ -1,0 +1,35 @@
+package com.example.tam110.ui.login;
+
+import android.provider.Settings;
+
+import androidx.annotation.Nullable;
+
+/**
+ * Authentication result : success (user details) or error message.
+ */
+class LoginResult {
+    @Nullable
+    private LoggedInUserView success;
+    @Nullable
+    private Integer error;
+
+    LoginResult(@Nullable Integer error) {
+        this.error = error;
+    }
+
+    LoginResult(@Nullable LoggedInUserView success) {
+
+        System.out.println("asddddddddddddddddddddddddddd"+success);
+        this.success = success;
+    }
+
+    @Nullable
+    LoggedInUserView getSuccess() {
+        return success;
+    }
+
+    @Nullable
+    Integer getError() {
+        return error;
+    }
+}

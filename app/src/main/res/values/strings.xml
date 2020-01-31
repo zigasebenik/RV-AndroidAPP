@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Tam - 110</string>
+    <!-- Strings related to login -->
+    <string name="prompt_email">Uporabniško ime</string>
+    <string name="prompt_password">Geslo</string>
+    <string name="action_sign_in">Prijava</string>
+    <string name="welcome">"Pozdravljen "</string>
+    <string name="invalid_username">Uporabniško ime ne more biti prazno</string>
+    <string name="invalid_password">Geslo ne more biti prazno</string>
+    <string name="login_failed">"Prijava neuspešna"</string>
+    <string name="kitchenLight">Kuhinjska luč</string>
+    <string name="toiletLight">Luč v WC-ju</string>
+    <string name="togglebutton">ToggleButton</string>
+    <string name="expandRoof">Razširi spalnico</string>
+    <string name="contractRoof">Skrči spalnico</string>
+    <string name="bedroomLight">Luč</string>
+    <string name="notranjost">Notranjost</string>
+    <string name="zunanjost">Zunanjost</string>
+    <string name="spalnica">Spalnica</string>
+    <string name="tab_text_1">Luči</string>
+    <string name="tab_text_2">Naprave</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="tableLight">Luč nad mizo</string>
+    <string name="roof">Motorji za streho</string>
+    <string name="motorButtonUP">GOR</string>
+    <string name="motorButtonDOWN">DOL</string>
+</resources>
