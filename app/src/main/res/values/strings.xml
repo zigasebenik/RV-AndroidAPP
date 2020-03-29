@@ -12,17 +12,6 @@
 
     <string name="tab_text_1">Luči</string>
     <string name="tab_text_2">Naprave</string>
-
-
-    <string-array name="Lights">
-        <item>Kuhinjska luč</item>
-        <item>Luč v spalnici</item>
-        <item>Luč nad mizo</item>
-        <item>Zunanja luč</item>
-    </string-array>
-
-
-
     <string name="spalnica">Spalnica</string>
     <string name="title_activity_main">MainActivity</string>
 

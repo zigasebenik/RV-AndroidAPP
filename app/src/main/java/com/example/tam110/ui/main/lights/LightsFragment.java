@@ -24,37 +24,6 @@ import java.util.List;
 import static com.example.tam110.ui.main.lights.data.LightsData.ITEMS_INITIALIZED;
 import static com.example.tam110.ui.main.lights.data.LightsData.addLight;
 
-/*final ToggleButton tableLightButton = (ToggleButton) root.findViewById(R.id.toggleButton21);
-        final ToggleButton outsideLightButton = (ToggleButton) root.findViewById(R.id.roofMotorDOWN);
-
-
-        final SeekBar tableLightSeekBar = (SeekBar) root.findViewById(R.id.tableLightSeekBar);
-        final SeekBar outsideLightSeekBar = (SeekBar) root.findViewById(R.id.outsideLightSeekBar);
-
-        tableLightSeekBar.setVisibility(View.GONE);
-        outsideLightSeekBar.setVisibility(View.GONE);
-
-        tableLightButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    //Toast.makeText(getActivity(), "UP prizgan", Toast.LENGTH_LONG).show();
-                    tableLightSeekBar.setVisibility(View.VISIBLE);
-                } else {
-                    tableLightSeekBar.setVisibility(View.GONE);
-                }
-            }
-        });
-
-        outsideLightButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    //Toast.makeText(getActivity(), "UP prizgan", Toast.LENGTH_LONG).show();
-                    outsideLightSeekBar.setVisibility(View.VISIBLE);
-                } else {
-                    outsideLightSeekBar.setVisibility(View.GONE);
-                }
-            }
-        });*/
 public class LightsFragment extends Fragment
 {
 
@@ -97,7 +66,7 @@ public class LightsFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState)
     {
-        View view = inflater.inflate(R.layout.devices_fragment_list, container, false);
+        View view = inflater.inflate(R.layout.lights_fragment_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView)
@@ -118,7 +87,13 @@ public class LightsFragment extends Fragment
                 List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
 
                 for(int i=0;i<names.size(); i++)
-                    addLight(new LightsData.Light(names.get(i)));
+                {
+                    String name = names.get(i);
+                    if(i < 2)
+                        addLight(new LightsData.Light(name, true));
+                    else
+                        addLight(new LightsData.Light(name, false));
+                }
 
                 ITEMS_INITIALIZED = true;
             }

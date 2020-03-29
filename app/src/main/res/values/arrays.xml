@@ -10,4 +10,11 @@
         <item>Črpalka za vodo</item>
         <item>Črpalka tuš</item>
     </string-array>
+
+    <string-array name="Lights">
+        <item>Kuhinjska luč</item>
+        <item>Luč v spalnici</item>
+        <item>Luč nad mizo</item>
+        <item>Zunanja luč</item>
+    </string-array>
 </resources>
