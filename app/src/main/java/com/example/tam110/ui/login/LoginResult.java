@@ -18,8 +18,6 @@ class LoginResult {
     }
 
     LoginResult(@Nullable LoggedInUserView success) {
-
-        System.out.println("asddddddddddddddddddddddddddd"+success);
         this.success = success;
     }
 

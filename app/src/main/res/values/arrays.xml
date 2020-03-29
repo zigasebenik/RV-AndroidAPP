@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="Devices">
+        <item>Motorji za streho</item>
+        <item>Radio</item>
+        <item>Štedilnik</item>
+        <item>Hladilnik</item>
+        <item>WC</item>
+        <item>Bojler</item>
+        <item>Črpalka za vodo</item>
+        <item>Črpalka tuš</item>
+    </string-array>
+</resources>

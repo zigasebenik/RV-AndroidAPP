@@ -14,8 +14,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +28,7 @@ import android.widget.Toast;
 
 import com.example.tam110.MainActivity;
 import com.example.tam110.R;
+import com.example.tam110.communication.bluetooth.BluetoothConnection;
 import com.example.tam110.ui.login.LoginViewModel;
 import com.example.tam110.ui.login.LoginViewModelFactory;
 
@@ -36,9 +40,9 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
-        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
-                .get(LoginViewModel.class);
+        loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory(LoginActivity.this)).get(LoginViewModel.class);
 
         final EditText usernameEditText = findViewById(R.id.username);
         final EditText passwordEditText = findViewById(R.id.password);
@@ -119,6 +123,22 @@ public class LoginActivity extends AppCompatActivity {
                         passwordEditText.getText().toString());
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == BluetoothConnection.REQUEST_ENABLE_BT)
+        {
+            if (resultCode == RESULT_OK)
+            {
+                Log.i("BluetoothCOMPLETE", "ENABLED");
+            }
+            else if (resultCode == RESULT_CANCELED)
+            {
+                Log.i("BluetoothCOMPLETE", "CANCELED");
+                BluetoothConnection.reTryBluetoothEnable(LoginActivity.this);
+            }
+        }
     }
 
     private void updateUiWithUser(LoggedInUserView model) {
