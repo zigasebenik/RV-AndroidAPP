@@ -125,22 +125,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BluetoothConnection.REQUEST_ENABLE_BT)
-        {
-            if (resultCode == RESULT_OK)
-            {
-                Log.i("BluetoothCOMPLETE", "ENABLED");
-            }
-            else if (resultCode == RESULT_CANCELED)
-            {
-                Log.i("BluetoothCOMPLETE", "CANCELED");
-                BluetoothConnection.reTryBluetoothEnable(LoginActivity.this);
-            }
-        }
-    }
-
     private void updateUiWithUser(LoggedInUserView model) {
         String welcome = getString(R.string.welcome) + model.getDisplayName();
         // TODO : initiate successful logged in experience

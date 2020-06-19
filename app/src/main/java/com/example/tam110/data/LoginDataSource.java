@@ -30,7 +30,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
-import com.example.tam110.communication.CommunicationService;
 import com.example.tam110.communication.bluetooth.BluetoothConnection;
 import com.example.tam110.data.model.LoggedInUser;
 
@@ -53,7 +52,6 @@ public class LoginDataSource {
     {
         this.activity = activity;
 
-        BluetoothConnection.setupConnection(activity);
     }
 
     public Result<LoggedInUser> login(String username, String password) {
