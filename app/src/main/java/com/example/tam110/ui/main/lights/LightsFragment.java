@@ -1,10 +1,11 @@
 package com.example.tam110.ui.main.lights;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.tam110.R;
+import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.lights.data.LightsData;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
 
@@ -63,6 +65,8 @@ public class LightsFragment extends Fragment
         }
     }
 
+    LightsRecyclerViewAdapter viewAdapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState)
     {
@@ -86,19 +90,29 @@ public class LightsFragment extends Fragment
             {
                 List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
 
+
                 for(int i=0;i<names.size(); i++)
                 {
                     String name = names.get(i);
+
+                    Intent getDataFromServer = new Intent(getContext(), BluetoothWriteReadIntentService.class);
+                    getDataFromServer.putExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, i);
+                    getDataFromServer.putExtra(BluetoothWriteReadIntentService.DEVICE_NAME, name);
+                    getDataFromServer.setAction(BluetoothWriteReadIntentService.READ_DATA);
+                    getContext().startService(getDataFromServer);
+
                     if(i < 2)
-                        addLight(new LightsData.Light(name, true));
+                        addLight(new LightsData.Light(name, true, false));
                     else
-                        addLight(new LightsData.Light(name, false));
+                        addLight(new LightsData.Light(name, false, false));
                 }
 
                 ITEMS_INITIALIZED = true;
             }
 
-            recyclerView.setAdapter(new LightsRecyclerViewAdapter(LightsData.ITEMS, mListener));
+            viewAdapter = new LightsRecyclerViewAdapter(LightsData.ITEMS, mListener);
+            recyclerView.setAdapter(viewAdapter);
+
         }
 
         return view;
@@ -118,6 +132,34 @@ public class LightsFragment extends Fragment
                                                + " must implement OnListFragmentInteractionListener");
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(receiver, new IntentFilter("UpdateMessageIntent"));
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(receiver);
+    }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String value = intent.getStringExtra(BluetoothWriteReadIntentService.READ_DATA);
+            int position = intent.getIntExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, -1);
+
+            if(value.equals("ON"))
+                LightsData.ITEMS.get(position).checkBox = true;
+            else if(value.equals("OFF"))
+                LightsData.ITEMS.get(position).checkBox = false;
+
+
+            viewAdapter.notifyItemChanged(position);
+        }
+    };
 
     @Override
     public void onDetach()

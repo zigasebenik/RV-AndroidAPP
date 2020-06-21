@@ -14,11 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -28,9 +25,6 @@ import android.widget.Toast;
 
 import com.example.tam110.MainActivity;
 import com.example.tam110.R;
-import com.example.tam110.communication.bluetooth.BluetoothConnection;
-import com.example.tam110.ui.login.LoginViewModel;
-import com.example.tam110.ui.login.LoginViewModelFactory;
 
 public class LoginActivity extends AppCompatActivity {
 

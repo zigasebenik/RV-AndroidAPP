@@ -28,11 +28,11 @@ public class LightsData
         public boolean hasSensitivity;
         public boolean checkBox;
 
-        public Light(String name, boolean hasSensitivity)
+        public Light(String name, boolean hasSensitivity, boolean checkBox)
         {
             this.name = name;
             this.hasSensitivity = hasSensitivity;
-            checkBox = false;
+            this.checkBox = checkBox;
         }
 
         @Override

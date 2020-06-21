@@ -1,21 +1,27 @@
 package com.example.tam110;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.tam110.communication.bluetooth.BluetoothConnection;
+import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.devices.DevicesFragment;
 import com.example.tam110.ui.main.devices.data.DeviceData;
 import com.example.tam110.ui.main.lights.LightsFragment;
 import com.example.tam110.ui.main.lights.data.LightsData;
 import com.google.android.material.tabs.TabLayout;
 
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,7 +30,10 @@ import com.example.tam110.ui.main.SectionsPagerAdapter;
 public class MainActivity extends AppCompatActivity implements DevicesFragment.OnListFragmentInteractionListener, LightsFragment.OnListFragmentInteractionListener
 {
 
+    private static final int PERMISSION_REQUEST_FINE_LOCATION = 1;
+    private static final int PERMISSION_REQUEST_BACKGROUND_LOCATION = 2;
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -39,12 +48,114 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
 
-        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(enableBtIntent, BluetoothConnection.REQUEST_ENABLE_BT);
-
         IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
         this.registerReceiver(mReceiver, filter);
 
+        if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            if (this.checkSelfPermission(Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
+                requestPermissions(new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION}, PERMISSION_REQUEST_BACKGROUND_LOCATION);
+            }
+        }
+        else
+        {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_BACKGROUND_LOCATION}, PERMISSION_REQUEST_FINE_LOCATION);
+        }
+
+    }
+
+    public void onRequestPermissionsResults(int requestCode, String[] permissions, int[] grantResults)
+    {
+        switch (requestCode)
+        {
+            case PERMISSION_REQUEST_BACKGROUND_LOCATION:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    Toast.makeText(this, "Dovoljenja uspšno dodana", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("TAM - 110");
+                    builder.setMessage("Aplikacija potrebuje dovoljenja za normalno delovanje.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener()
+                    {
+                        @Override
+                        public void onDismiss(DialogInterface dialog)
+                        {
+                        }
+                    });
+                    builder.show();
+                }
+                return;
+            case PERMISSION_REQUEST_FINE_LOCATION:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                {
+                    Toast.makeText(this, "Dovoljenja uspšno dodana", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("TAM - 110");
+                    builder.setMessage("Aplikacija potrebuje dovoljenja za normalno delovanje.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener()
+                    {
+                        @Override
+                        public void onDismiss(DialogInterface dialog)
+                        {
+                        }
+                    });
+                    builder.show();
+                }
+                return;
+        }
+        // Other 'case' lines to check for other
+        // permissions this app might request.
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent)
+    {
+        super.onNewIntent(intent);
+
+        if(intent.getAction().equals(BluetoothWriteReadIntentService.ALERT))
+        {
+            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Obvestilo");
+            builder.setMessage(intent.getStringExtra(BluetoothWriteReadIntentService.DEVICE_POSITION));
+            builder.setPositiveButton(android.R.string.ok, null);
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+
+                }
+
+            });
+
+            builder.show();
+        }
+
+    }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        startActivityForResult(enableBtIntent, BluetoothWriteReadIntentService.REQUEST_ENABLE_BT);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -60,8 +171,9 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == BluetoothConnection.REQUEST_ENABLE_BT)
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == BluetoothWriteReadIntentService.REQUEST_ENABLE_BT)
         {
             if (resultCode == RESULT_OK)
             {
@@ -70,8 +182,7 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
             else if (resultCode == RESULT_CANCELED)
             {
                 Log.i("BluetoothCOMPLETE", "CANCELED");
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, BluetoothConnection.REQUEST_ENABLE_BT);
+                Toast.makeText(this, "Aplikacija potrebuje bluetooth za delovanje", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -79,15 +190,19 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
     public static final BroadcastReceiver mReceiver = new BroadcastReceiver()
     {
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             final String action = intent.getAction();
 
             //Log.i("BluetoothINFO", "stateOff: "+BluetoothAdapter.STATE_OFF);
 
-            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
-                                                     BluetoothAdapter.ERROR);
-                switch (state) {
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED))
+            {
+                final int state = intent.getIntExtra(
+                        BluetoothAdapter.EXTRA_STATE,
+                        BluetoothAdapter.ERROR);
+                switch (state)
+                {
                     case BluetoothAdapter.STATE_OFF:
                         //Toast.makeText(context.getApplicationContext(), "Bluetooth off", Toast.LENGTH_LONG).show();
                         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -97,7 +212,7 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
                         //Toast.makeText(context.getApplicationContext(), "Turning Bluetooth off...", Toast.LENGTH_LONG).show();
                         break;
                     case BluetoothAdapter.STATE_ON:
-                        Toast.makeText(context.getApplicationContext(), "Bluetooth turned on :)", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context.getApplicationContext(), "Bluetooth prižgan :)", Toast.LENGTH_LONG).show();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
                         //Toast.makeText(context.getApplicationContext(), "Turning Bluetooth on...", Toast.LENGTH_LONG).show();

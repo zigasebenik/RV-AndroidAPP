@@ -1,6 +1,5 @@
 package com.example.tam110.ui.main.lights;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +12,7 @@ import android.widget.ToggleButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tam110.R;
-import com.example.tam110.communication.bluetooth.BluetoothConnection;
+import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
 
 import java.util.List;
@@ -75,12 +74,12 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-                Intent sendDataToServer = new Intent(v.getContext(), BluetoothConnection.class);
-                sendDataToServer.setAction(BluetoothConnection.SEND_TO_SERVER);
+                Intent sendDataToServer = new Intent(v.getContext(), BluetoothWriteReadIntentService.class);
+                sendDataToServer.setAction(BluetoothWriteReadIntentService.WRITE_DATA);
 
                 int value = holder.mToggleButtonView.isChecked() ? 1 : 0;
-                sendDataToServer.putExtra(BluetoothConnection.BLE_DATA, value);
-                sendDataToServer.putExtra(BluetoothConnection.DEVICE_ID, holder.mNameView.getText());
+                sendDataToServer.putExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, value);
+                sendDataToServer.putExtra(BluetoothWriteReadIntentService.DEVICE_NAME, holder.mNameView.getText());
                 v.getContext().startService(sendDataToServer);
             }
         });
