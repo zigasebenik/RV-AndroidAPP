@@ -55,23 +55,15 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-                if (null != mListener)
-                {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
+            if (null != mListener)
+            {
+                // Notify the active callbacks interface (the activity, if the
+                // fragment is attached to one) that an item has been selected.
+                mListener.onListFragmentInteraction(holder.mItem);
+            }
             }
         });
 
-        holder.mToggleButtonView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-                holder.mItem.checkBox = isChecked;
-            }
-        });
 
         holder.mToggleButtonView.setOnClickListener(new View.OnClickListener()
         {
@@ -84,26 +76,10 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             }
         });
 
-        holder.mSeekBarView.setVisibility(View.GONE);
-        if(mLights.get(position).hasSensitivity == true)
-        {
-            holder.mToggleButtonView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-            {
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                {
-                    if (isChecked)
-                    {
-                        //Toast.makeText(getActivity(), "UP prizgan", Toast.LENGTH_LONG).show();
-                        holder.mSeekBarView.setVisibility(View.VISIBLE);
-                    }
-                    else
-                    {
-                        holder.mSeekBarView.setVisibility(View.GONE);
-                    }
-                }
-            });
-        }
-
+        if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == true)
+            holder.mSeekBarView.setVisibility(View.VISIBLE);
+        else
+            holder.mSeekBarView.setVisibility(View.GONE);
     }
 
 

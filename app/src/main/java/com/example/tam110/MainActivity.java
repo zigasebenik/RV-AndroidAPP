@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         }
     }
 
-    public static final BroadcastReceiver mReceiver = new BroadcastReceiver()
+    public final BroadcastReceiver mReceiver = new BroadcastReceiver()
     {
         @Override
         public void onReceive(Context context, Intent intent)
@@ -207,14 +207,9 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
                         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                         context.startActivity(enableBtIntent);
                         break;
-                    case BluetoothAdapter.STATE_TURNING_OFF:
-                        //Toast.makeText(context.getApplicationContext(), "Turning Bluetooth off...", Toast.LENGTH_LONG).show();
-                        break;
                     case BluetoothAdapter.STATE_ON:
                         Toast.makeText(context.getApplicationContext(), "Bluetooth prižgan :)", Toast.LENGTH_LONG).show();
-                        break;
-                    case BluetoothAdapter.STATE_TURNING_ON:
-                        //Toast.makeText(context.getApplicationContext(), "Turning Bluetooth on...", Toast.LENGTH_LONG).show();
+                        mService.connectWithServerDevice();
                         break;
                 }
             }
@@ -238,16 +233,10 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         }
     };
 
-    final Handler handler = new Handler();
-
     public void readData(String name, int position)
     {
         if(mBound == true)
             mService.readData(name,position);
-        else
-        {
-            handler.postDelayed(new MyRunnable(name, position), 50);
-        }
     }
 
     public void sendData(String name, int position)
@@ -256,17 +245,5 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
             mService.sendData(name,position);
     }
 
-    public class MyRunnable implements Runnable {
-        private String name;
-        private int position;
-        public MyRunnable(String name, int position) {
-            this.name = name;
-            this.position = position;
-        }
 
-        @Override
-        public void run() {
-            mService.readData(name,position);
-        }
-    }
 }

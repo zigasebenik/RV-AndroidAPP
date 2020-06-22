@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentServic
 import com.example.tam110.ui.main.lights.data.LightsData;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,6 +72,7 @@ public class LightsFragment extends Fragment
     }
 
     LightsRecyclerViewAdapter viewAdapter;
+    final Handler handler = new Handler();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState)
@@ -95,6 +98,7 @@ public class LightsFragment extends Fragment
             {
                 List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
 
+                handler.postDelayed(new UpdateUIReadValues(names), 75);
 
                 for(int i=0;i<names.size(); i++)
                 {
@@ -172,6 +176,42 @@ public class LightsFragment extends Fragment
     {
         // TODO: Update argument type and name
         void onListFragmentInteraction(Light item);
+    }
+
+
+    public class UpdateUIReadValues implements Runnable {
+        private List<String> names;
+        public UpdateUIReadValues(List<String> names) {
+            this.names = names;
+        }
+
+        Handler handler = new Handler();
+
+        @Override
+        public void run()
+        {
+            for(int i=0;i<names.size(); i++)
+            {
+                String name = names.get(i);
+
+                handler.postDelayed(new SingleTask(name, i), 600*i);
+            }
+        }
+
+        public class SingleTask implements Runnable {
+            private String name;
+            private int position;
+            public SingleTask(String name, int position) {
+                this.name = name;
+                this.position = position;
+            }
+
+            @Override
+            public void run()
+            {
+                mainActivity.readData(name, position);
+            }
+        }
     }
 
 }
