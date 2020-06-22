@@ -1,11 +1,13 @@
 package com.example.tam110.communication.bluetooth;
 
 import android.app.IntentService;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -16,10 +18,15 @@ import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
 import android.companion.AssociationRequest;
 import android.companion.BluetoothDeviceFilter;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
@@ -28,6 +35,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.example.tam110.MainActivity;
+import com.example.tam110.ui.main.lights.data.LightsData;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +45,7 @@ import java.util.UUID;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 
-public class BluetoothWriteReadIntentService extends IntentService
+public class BluetoothWriteReadIntentService extends Service
 {
 
     public final static int REQUEST_ENABLE_BT = 1;
@@ -46,7 +54,7 @@ public class BluetoothWriteReadIntentService extends IntentService
     public static final String WRITE_DATA = "WRITE_DATA";
     public static final String DEVICE_POSITION = "BLE_DATA";
     public static final String DEVICE_NAME = "DEVICE_ID";
-    public static final String READ_DATA = "READ_DATA";
+    public static final String DATA = "READ_DATA";
     public static final String CHARASTERISTIC_READ_RESULT = "CHARASTERISTIC_READ_RESULT";
 
 
@@ -67,12 +75,34 @@ public class BluetoothWriteReadIntentService extends IntentService
     private String deviceName;
 
 
-    public BluetoothWriteReadIntentService()
+    private final IBinder binder = new LocalBinder();
+
+    @Override
+    public void onCreate()
     {
-        super("BluetoothConnection");
+        super.onCreate();
     }
 
-    private void sendData(String deviceName, int value)
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+    }
+
+    public class LocalBinder extends Binder
+    {
+        public BluetoothWriteReadIntentService getService() {
+            // Return this instance of LocalService so clients can call public methods
+            return BluetoothWriteReadIntentService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+    public void sendData(String deviceName, int value)
     {
         this.position = value;
         this.deviceName = deviceName;
@@ -107,9 +137,12 @@ public class BluetoothWriteReadIntentService extends IntentService
                     if (serverName.equals("TAM-110-50b0bd5c-c67b") && serverHardwareAddress.equals("30:AE:A4:9C:C8:4E"))
                     {
                         //CONNECT to SERVER
-                        if(connectionState == STATE_DISCONNECTED)
-                            bluetoothGatt = device.connectGatt(this, true, gattWriteCallback);
 
+                        if(connectionState == STATE_DISCONNECTED)
+                        {
+                            showToast("Povezujem z server napravo");
+                        }
+                        bluetoothGatt = device.connectGatt(this, true, gattWriteCallback);
                         serverPaired = true;
                     }
                 }
@@ -126,7 +159,7 @@ public class BluetoothWriteReadIntentService extends IntentService
         }
     }
 
-    private void readData(String deviceName, int value)
+    public void readData(String deviceName, int value)
     {
         this.position = value;
         this.deviceName = deviceName;
@@ -195,8 +228,6 @@ public class BluetoothWriteReadIntentService extends IntentService
             if(device.getName().equals("TAM-110-50b0bd5c-c67b"))
             {
                 device.createBond();
-
-
             }
         }
 
@@ -218,16 +249,16 @@ public class BluetoothWriteReadIntentService extends IntentService
 
     final BluetoothGattCallback gattWriteCallback = new BluetoothGattCallback()
     {
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
-            String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED)
             {
                 connectionState = STATE_CONNECTED;
+                showToast("Uspešno povezano");
                 Log.i(TAG, "Connected to GATT server.");
                 Log.i(TAG, "Attempting to start service discovery:" + bluetoothGatt.discoverServices());
-
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
@@ -249,6 +280,13 @@ public class BluetoothWriteReadIntentService extends IntentService
 
                 BluetoothGattService service = gatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
                 BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
+                gatt.setCharacteristicNotification(characteristic, true);
+
+                UUID uuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(uuid);
+                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                gatt.writeDescriptor(descriptor);
+
                 characteristic.setValue(String.valueOf(position));
                 bluetoothGatt.writeCharacteristic(characteristic);
             }
@@ -267,6 +305,11 @@ public class BluetoothWriteReadIntentService extends IntentService
                 showToast(deviceName+" prižgana");
             else if(value.equals("OFF"))
                 showToast(deviceName+" ugasnjena");
+
+            Intent intent = new Intent("UpdateMessageIntent");
+            intent.putExtra(DEVICE_POSITION, position);
+            intent.putExtra(DATA, new String(characteristic.getValue()));
+            sendBroadcast(intent);
         }
     };
 
@@ -326,33 +369,13 @@ public class BluetoothWriteReadIntentService extends IntentService
 
                 Intent intent = new Intent("UpdateMessageIntent");
                 intent.putExtra(DEVICE_POSITION, position);
-                intent.putExtra(READ_DATA, new String(characteristic.getValue()));
+                intent.putExtra(DATA, new String(characteristic.getValue()));
                 sendBroadcast(intent);
             }
         }
     };
 
-
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent)
-    {
-        String action = intent.getAction();
-
-        if (action.equals(WRITE_DATA))
-        {
-            int value = intent.getIntExtra(DEVICE_POSITION, 0);
-            String deviceName = intent.getStringExtra(DEVICE_NAME);
-            sendData(deviceName, value);
-        }
-        else if (action.equals(READ_DATA))
-        {
-            int value = intent.getIntExtra(DEVICE_POSITION, 0);
-            String deviceName = intent.getStringExtra(DEVICE_NAME);
-            readData(deviceName, value);
-        }
-    }
-
-    public void showToast(String message) {
+    private void showToast(String message) {
         final String msg = message;
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override

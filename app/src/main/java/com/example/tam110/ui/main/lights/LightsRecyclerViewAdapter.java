@@ -11,6 +11,7 @@ import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.tam110.MainActivity;
 import com.example.tam110.R;
 import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
@@ -23,10 +24,13 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
 
     private final LightsFragment.OnListFragmentInteractionListener mListener;
 
-    public LightsRecyclerViewAdapter(List<Light> listOfLightsData, LightsFragment.OnListFragmentInteractionListener listener)
+    MainActivity mainActivity;
+
+    public LightsRecyclerViewAdapter(List<Light> listOfLightsData, LightsFragment.OnListFragmentInteractionListener listener, MainActivity mainActivity)
     {
         mLights = listOfLightsData;
         mListener = listener;
+        this.mainActivity = mainActivity;
     }
 
     @Override
@@ -74,13 +78,9 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-                Intent sendDataToServer = new Intent(v.getContext(), BluetoothWriteReadIntentService.class);
-                sendDataToServer.setAction(BluetoothWriteReadIntentService.WRITE_DATA);
 
-                int value = holder.mToggleButtonView.isChecked() ? 1 : 0;
-                sendDataToServer.putExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, value);
-                sendDataToServer.putExtra(BluetoothWriteReadIntentService.DEVICE_NAME, holder.mNameView.getText());
-                v.getContext().startService(sendDataToServer);
+                holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
+                mainActivity.sendData(holder.mNameView.getText().toString(), position);
             }
         });
 

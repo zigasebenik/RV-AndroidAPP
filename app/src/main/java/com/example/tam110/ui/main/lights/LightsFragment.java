@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.tam110.MainActivity;
 import com.example.tam110.R;
 import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.lights.data.LightsData;
@@ -35,6 +36,8 @@ public class LightsFragment extends Fragment
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
+    MainActivity mainActivity;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -43,8 +46,7 @@ public class LightsFragment extends Fragment
     {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
+
     public static LightsFragment newInstance(int columnCount)
     {
         LightsFragment fragment = new LightsFragment();
@@ -63,6 +65,8 @@ public class LightsFragment extends Fragment
         {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+
+        mainActivity = (MainActivity) getActivity();
     }
 
     LightsRecyclerViewAdapter viewAdapter;
@@ -86,6 +90,7 @@ public class LightsFragment extends Fragment
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
 
+
             if(ITEMS_INITIALIZED == false)
             {
                 List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
@@ -94,12 +99,7 @@ public class LightsFragment extends Fragment
                 for(int i=0;i<names.size(); i++)
                 {
                     String name = names.get(i);
-
-                    Intent getDataFromServer = new Intent(getContext(), BluetoothWriteReadIntentService.class);
-                    getDataFromServer.putExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, i);
-                    getDataFromServer.putExtra(BluetoothWriteReadIntentService.DEVICE_NAME, name);
-                    getDataFromServer.setAction(BluetoothWriteReadIntentService.READ_DATA);
-                    getContext().startService(getDataFromServer);
+                    mainActivity.readData(name,i);
 
                     if(i < 2)
                         addLight(new LightsData.Light(name, true, false));
@@ -110,7 +110,7 @@ public class LightsFragment extends Fragment
                 ITEMS_INITIALIZED = true;
             }
 
-            viewAdapter = new LightsRecyclerViewAdapter(LightsData.ITEMS, mListener);
+            viewAdapter = new LightsRecyclerViewAdapter(LightsData.ITEMS, mListener, mainActivity);
             recyclerView.setAdapter(viewAdapter);
 
         }
@@ -148,7 +148,7 @@ public class LightsFragment extends Fragment
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String value = intent.getStringExtra(BluetoothWriteReadIntentService.READ_DATA);
+            String value = intent.getStringExtra(BluetoothWriteReadIntentService.DATA);
             int position = intent.getIntExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, -1);
 
             if(value.equals("ON"))
