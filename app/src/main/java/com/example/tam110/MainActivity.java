@@ -12,6 +12,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -237,15 +238,35 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         }
     };
 
+    final Handler handler = new Handler();
+
     public void readData(String name, int position)
     {
         if(mBound == true)
             mService.readData(name,position);
+        else
+        {
+            handler.postDelayed(new MyRunnable(name, position), 50);
+        }
     }
 
     public void sendData(String name, int position)
     {
         if(mBound == true)
             mService.sendData(name,position);
+    }
+
+    public class MyRunnable implements Runnable {
+        private String name;
+        private int position;
+        public MyRunnable(String name, int position) {
+            this.name = name;
+            this.position = position;
+        }
+
+        @Override
+        public void run() {
+            mService.readData(name,position);
+        }
     }
 }
