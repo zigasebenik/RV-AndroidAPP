@@ -156,12 +156,6 @@ public class BluetoothWriteReadIntentService extends Service
             BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
             characteristic.setValue(String.valueOf(position));
             bluetoothGatt.writeCharacteristic(characteristic);
-
-
-            bluetoothGatt.setCharacteristicNotification(characteristic, true);
-            BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
-            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-            bluetoothGatt.writeDescriptor(descriptor);
         }
         else if(connectionState == STATE_DISCONNECTED)
         {
