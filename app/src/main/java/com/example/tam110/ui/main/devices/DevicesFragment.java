@@ -1,21 +1,29 @@
 package com.example.tam110.ui.main.devices;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.tam110.MainActivity;
 import com.example.tam110.R;
+import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.devices.data.DeviceData;
 import com.example.tam110.ui.main.devices.data.DeviceData.Device;
 import com.example.tam110.ui.main.lights.LightsFragment;
+import com.example.tam110.ui.main.lights.LightsRecyclerViewAdapter;
 import com.example.tam110.ui.main.lights.data.LightsData;
 
 import org.json.JSONException;
@@ -32,11 +40,13 @@ public class DevicesFragment extends Fragment
 {
 
     public static final String UPDATE_DEVICES_UI = "UPDATE_DEVICES_UI";
-    // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
+
+    MainActivity mainActivity;
+    DevicesRecyclerViewAdapter viewAdapter;
+    final Handler handler = new Handler();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -46,8 +56,7 @@ public class DevicesFragment extends Fragment
     {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
+
     public static DevicesFragment newInstance(int columnCount)
     {
         DevicesFragment fragment = new DevicesFragment();
@@ -66,6 +75,7 @@ public class DevicesFragment extends Fragment
         {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
+        mainActivity = (MainActivity) getActivity();
     }
 
     @Override
@@ -99,9 +109,9 @@ public class DevicesFragment extends Fragment
                         jsonObject = new JSONObject(arrayOfJson.get(i).replaceAll("\\s", "|"));
                         String name = jsonObject.get("name").toString().replaceAll("\\|", " ");
                         String UUID = jsonObject.get("UUID").toString();
-                        boolean analog = jsonObject.getBoolean("analog");
 
-                        addLight(new LightsData.Light(UUID, name, false, false, i, LightsFragment.class.toString()));
+                        addDevice(new Device(UUID, name, false, false, i, DevicesFragment.class.toString()));
+                        //handler.postDelayed(new DevicesFragment.ReadCharacteristic(UUID), 500*i);
 
                     } catch (JSONException e)
                     {
@@ -112,7 +122,8 @@ public class DevicesFragment extends Fragment
                 ITEMS_INITIALIZED = true;
             }
 
-            recyclerView.setAdapter(new DevicesRecyclerViewAdapter(DeviceData.ITEMS, mListener));
+            viewAdapter = new DevicesRecyclerViewAdapter(DeviceData.ITEMS, mListener, mainActivity);
+            recyclerView.setAdapter(viewAdapter);
         }
 
         return view;
@@ -134,6 +145,34 @@ public class DevicesFragment extends Fragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(mainActivity).registerReceiver(receiver, new IntentFilter(UPDATE_DEVICES_UI));
+    }
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(mainActivity).unregisterReceiver(receiver);
+    }
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String value = intent.getStringExtra(BluetoothWriteReadIntentService.DATA);
+            int position = intent.getIntExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, -1);
+
+            if(value.equals("ON"))
+                DeviceData.ITEMS.get(position).checkBox = true;
+            else if(value.equals("OFF"))
+                DeviceData.ITEMS.get(position).checkBox = false;
+
+
+            viewAdapter.notifyItemChanged(position);
+        }
+    };
+
+    @Override
     public void onDetach()
     {
         super.onDetach();
@@ -146,6 +185,19 @@ public class DevicesFragment extends Fragment
         void onListFragmentInteraction(Device item);
     }
 
+
+    public class ReadCharacteristic implements Runnable {
+        private String UUID;
+        public ReadCharacteristic(String UUID) {
+            this.UUID = UUID;
+        }
+
+        @Override
+        public void run()
+        {
+            mainActivity.readData(UUID);
+        }
+    }
 }
 
 

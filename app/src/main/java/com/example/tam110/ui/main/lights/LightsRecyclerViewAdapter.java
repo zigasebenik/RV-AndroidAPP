@@ -3,6 +3,7 @@ package com.example.tam110.ui.main.lights;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -67,15 +68,27 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-                holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
+                //holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
 
                 if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == false)
-                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString(), 255);
+                    mainActivity.sendData(mLights.get(position).UUID, 255);
                 else if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == true)
-                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString(), 0);
+                    mainActivity.sendData(mLights.get(position).UUID, 0);
                 else
-                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString());
+                    mainActivity.sendData(mLights.get(position).UUID);
 
+            }
+        });
+
+        holder.mToggleButtonView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            {
+                if(holder.mItem.hasSensitivity == true && isChecked == true)
+                    holder.mSeekBarView.setVisibility(View.VISIBLE);
+                else
+                    holder.mSeekBarView.setVisibility(View.GONE);
             }
         });
 

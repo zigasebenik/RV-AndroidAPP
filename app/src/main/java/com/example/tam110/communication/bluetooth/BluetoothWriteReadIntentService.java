@@ -28,6 +28,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.tam110.MainActivity;
 import com.example.tam110.ui.main.Data;
@@ -73,6 +74,9 @@ public class BluetoothWriteReadIntentService extends Service
     private static final String PIN = "4567983215";
 
 
+    boolean startScanning = false;
+    boolean startBonding = false;
+
     private final IBinder binder = new LocalBinder();
 
     @Override
@@ -94,6 +98,7 @@ public class BluetoothWriteReadIntentService extends Service
         {
             connectWithServerDevice();
         }
+
     }
 
     public void connectWithServerDevice()
@@ -219,7 +224,11 @@ public class BluetoothWriteReadIntentService extends Service
 
             if(device.getName().equals("TAM-110-50b0bd5c-c67b"))
             {
-                device.createBond();
+                if(startBonding == false)
+                {
+                    device.createBond();
+                    startBonding = true;
+                }
             }
         }
 
@@ -250,7 +259,7 @@ public class BluetoothWriteReadIntentService extends Service
                 showToast("Povezava vzpostaveljena.");
                 Log.i(TAG, "Connected to GATT server.");
                 Log.i(TAG, "Attempting to start service discovery:" + bluetoothGatt.discoverServices());
-
+                startBonding = false;
                 //BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
                 //BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
             }
@@ -305,7 +314,7 @@ public class BluetoothWriteReadIntentService extends Service
 
             intent.putExtra(DEVICE_POSITION, device.UIposition);
             intent.putExtra(DATA, new String(characteristic.getValue()));
-            sendBroadcast(intent);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
         }
 
         @Override
@@ -327,7 +336,8 @@ public class BluetoothWriteReadIntentService extends Service
 
                 intent.putExtra(DEVICE_POSITION, device.UIposition);
                 intent.putExtra(DATA, new String(characteristic.getValue()));
-                sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
             }
         }
     };
@@ -374,10 +384,15 @@ public class BluetoothWriteReadIntentService extends Service
             public void run() {
                 bluetoothLeScanner.flushPendingScanResults(scanCallback);
                 bluetoothLeScanner.stopScan(scanCallback);
+                startScanning = false;
             }
-        }, 100);
+        }, 50);
 
-        bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, scanCallback);
+        if(startScanning == false)
+        {
+            startScanning = true;
+            bluetoothLeScanner.startScan(Collections.singletonList(scanFilter), scanSettings, scanCallback);
+        }
 
     }
 

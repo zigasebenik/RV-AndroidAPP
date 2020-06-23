@@ -10,6 +10,7 @@ import android.widget.ToggleButton;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.tam110.MainActivity;
 import com.example.tam110.R;
 import com.example.tam110.ui.main.devices.DevicesFragment.OnListFragmentInteractionListener;
 import com.example.tam110.ui.main.devices.data.DeviceData.Device;
@@ -23,10 +24,14 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
 
     private final OnListFragmentInteractionListener mListener;
 
-    public DevicesRecyclerViewAdapter(List<Device> listOfDeviceData, OnListFragmentInteractionListener listener)
+    MainActivity mainActivity;
+
+
+    public DevicesRecyclerViewAdapter(List<Device> listOfDeviceData, OnListFragmentInteractionListener listener, MainActivity mainActivity)
     {
         mDevices = listOfDeviceData;
         mListener = listener;
+        this.mainActivity = mainActivity;
     }
 
     @Override
@@ -39,7 +44,7 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
 
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position)
+    public void onBindViewHolder(final ViewHolder holder, final int position)
     {
 
         holder.mItem = mDevices.get(position);
@@ -60,14 +65,14 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
             }
         });
 
-        holder.mToggleButtonView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        holder.mToggleButtonView.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                holder.mItem.checkBox = isChecked;
+            public void onClick(View v)
+            {
+                mainActivity.sendData(mDevices.get(position).UUID);
             }
         });
-
     }
 
 

@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import static com.example.tam110.ui.main.lights.data.LightsData.ITEMS_INITIALIZED;
 import static com.example.tam110.ui.main.lights.data.LightsData.addLight;
@@ -43,7 +45,9 @@ public class LightsFragment extends Fragment
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
 
+    LightsRecyclerViewAdapter viewAdapter;
     MainActivity mainActivity;
+    final Handler handler = new Handler();
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -76,9 +80,6 @@ public class LightsFragment extends Fragment
         mainActivity = (MainActivity) getActivity();
     }
 
-    LightsRecyclerViewAdapter viewAdapter;
-    final Handler handler = new Handler();
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState)
     {
@@ -103,7 +104,6 @@ public class LightsFragment extends Fragment
             {
                 List<String> arrayOfJson = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
 
-                //handler.postDelayed(new UpdateUIReadValues(names), 75);
 
                 for(int i=0;i<arrayOfJson.size(); i++)
                 {
@@ -116,6 +116,7 @@ public class LightsFragment extends Fragment
                         boolean analog = jsonObject.getBoolean("analog");
 
                         addLight(new LightsData.Light(UUID, name, analog, false, i, LightsFragment.class.toString()));
+                        handler.postDelayed(new ReadCharacteristic(UUID), 500*i);
 
                     } catch (JSONException e)
                     {
@@ -152,12 +153,12 @@ public class LightsFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(receiver, new IntentFilter(UPDATE_LIGHTS_UI));
+        LocalBroadcastManager.getInstance(mainActivity).registerReceiver(receiver, new IntentFilter(UPDATE_LIGHTS_UI));
     }
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(receiver);
+        LocalBroadcastManager.getInstance(mainActivity).unregisterReceiver(receiver);
     }
 
     private BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -171,7 +172,6 @@ public class LightsFragment extends Fragment
                 LightsData.ITEMS.get(position).checkBox = true;
             else if(value.equals("OFF"))
                 LightsData.ITEMS.get(position).checkBox = false;
-
 
             viewAdapter.notifyItemChanged(position);
         }
@@ -191,38 +191,23 @@ public class LightsFragment extends Fragment
     }
 
 
-    public class UpdateUIReadValues implements Runnable {
-        private List<String> names;
-        public UpdateUIReadValues(List<String> names) {
-            this.names = names;
+    public class ReadCharacteristic implements Runnable {
+        private String UUID;
+        public ReadCharacteristic(String UUID) {
+            this.UUID = UUID;
         }
-
-        Handler handler = new Handler();
 
         @Override
         public void run()
         {
-            for(int i=0;i<names.size(); i++)
+            mainActivity.runOnUiThread(new Runnable()
             {
-                String name = names.get(i);
-
-                handler.postDelayed(new SingleTask(name, i), 600*i);
-            }
-        }
-
-        public class SingleTask implements Runnable {
-            private String name;
-            private int position;
-            public SingleTask(String name, int position) {
-                this.name = name;
-                this.position = position;
-            }
-
-            @Override
-            public void run()
-            {
-                mainActivity.readData(name, name);
-            }
+                @Override
+                public void run()
+                {
+                    mainActivity.readData(UUID);
+                }
+            });
         }
     }
 

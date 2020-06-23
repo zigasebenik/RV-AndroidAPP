@@ -233,19 +233,19 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         }
     };
 
-    public void readData(String charcteristicUUID, String deviceName)
+    public void readData(String charcteristicUUID)
     {
         if(mBound == true)
             mService.readData(charcteristicUUID);
     }
 
-    public void sendData(String charcteristicUUID, String deviceName)
+    public void sendData(String charcteristicUUID)
     {
         if(mBound == true)
             mService.sendData(charcteristicUUID);
     }
 
-    public void sendData(String charcteristicUUID, String deviceName, int sensitivity)
+    public void sendData(String charcteristicUUID, int sensitivity)
     {
         if(mBound == true)
             mService.sendData(charcteristicUUID, sensitivity);
