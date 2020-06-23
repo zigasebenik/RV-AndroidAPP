@@ -1,20 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="Devices">
-        <item>Motorji za streho</item>
-        <item>Radio</item>
-        <item>Štedilnik</item>
-        <item>Hladilnik</item>
-        <item>WC</item>
-        <item>Bojler</item>
-        <item>Črpalka za vodo</item>
-        <item>Črpalka tuš</item>
+        <item>{"name":"Motor za streho GOR","UUID":"a5e7d010-e10d-41f5-88f1-c4e162036716"}</item>
+        <item>{"name":"Motor za streho DOL","UUID":"f6fa99e7-95ed-458b-a524-a8c2c54025ea"}</item>
+        <item>{"name":"Radio","UUID":"f00c0812-093b-471e-908d-45962274de39"}</item>
+        <item>{"name":"Štedilnik","UUID":"f39658f1-6607-4e85-a781-6eea879ae162"}</item>
+        <item>{"name":"Hladilnik","UUID":"f2f6c898-f4c5-456f-8d7f-224cac4fa4aa"}</item>
+        <item>{"name":"WC","UUID":"0be00253-cde8-47b2-97de-b47305a10829"}</item>
+        <item>{"name":"Bojler","UUID":"58adf145-6edf-4555-8949-db198b1a0c90"}</item>
+        <item>{"name":"Črpalka za vodo","UUID":"5b4100bd-9624-407f-9493-0ab00697a7c0"}</item>
+        <item>{"name":"Črpalka za tuš","UUID":"a90c365b-7cf0-497a-9152-b30d469619e5"}</item>
     </string-array>
+    <!--
+        //NAPRAVE
+        devices.insert(std::make_pair("a5e7d010-e10d-41f5-88f1-c4e162036716", new Device("motorUP",12, false, true)));
+        devices.insert(std::make_pair("f6fa99e7-95ed-458b-a524-a8c2c54025ea", new Device("motorDOWN",16, false, true)));
+        devices.insert(std::make_pair("f00c0812-093b-471e-908d-45962274de39", new Device("radio",17, false, true)));
+        devices.insert(std::make_pair("f39658f1-6607-4e85-a781-6eea879ae162", new Device("stedilnik",18, false, true)));
+        devices.insert(std::make_pair("f2f6c898-f4c5-456f-8d7f-224cac4fa4aa", new Device("hladilnik",27, false, true)));
+        devices.insert(std::make_pair("0be00253-cde8-47b2-97de-b47305a10829", new Device("wc",32, false, true)));
+        devices.insert(std::make_pair("58adf145-6edf-4555-8949-db198b1a0c90", new Device("bojler",33, false, true)));
+        devices.insert(std::make_pair("5b4100bd-9624-407f-9493-0ab00697a7c0", new Device("crpalkaVoda",23, false, true)));
+        devices.insert(std::make_pair("a90c365b-7cf0-497a-9152-b30d469619e5", new Device("crpalkaTus",22, false, true)));
+    -->
+        <string-array name="Lights">
+            <item>{"name":"Kuhinjska luč","UUID":"df69f4bc-9d4e-452a-a540-5aa3568438f7","analog":true}</item>
+            <item>{"name":"Luč v spalnici","UUID":"b16505dc-1036-4031-aafb-a438610c68d0","analog":true}</item>
+            <item>{"name":"Luč nad mizo","UUID":"441f2874-b1e5-41f3-b980-143a6dbb5779","analog":false}</item>
+            <item>{"name":"Zunanja luč","UUID":"e5aa985c-4b1b-45f6-be4a-c48f9c904a8c","analog":false}</item>
+        </string-array>
 
-    <string-array name="Lights">
-        <item>Kuhinjska luč</item>
-        <item>Luč v spalnici</item>
-        <item>Luč nad mizo</item>
-        <item>Zunanja luč</item>
-    </string-array>
+
+
+    <!-- //LUCI
+     devices.insert(std::make_pair("df69f4bc-9d4e-452a-a540-5aa3568438f7", new Device("kuhinjskaLuc",DAC1, false, false)));
+     devices.insert(std::make_pair("b16505dc-1036-4031-aafb-a438610c68d0", new Device("lucSpalnica",DAC1, false, false)));
+     devices.insert(std::make_pair("441f2874-b1e5-41f3-b980-143a6dbb5779", new Device("lucMiza",2, false, true)));
+     devices.insert(std::make_pair("e5aa985c-4b1b-45f6-be4a-c48f9c904a8c", new Device("zunanjaLuc",4, false, true)));
+
+ -->
+
+
+
+
 </resources>

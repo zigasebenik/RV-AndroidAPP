@@ -44,7 +44,7 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
 
         holder.mItem = mDevices.get(position);
         holder.mNameView.setText(mDevices.get(position).name);
-        holder.mToggleButtonView.setChecked(mDevices.get(position).checkbox);
+        holder.mToggleButtonView.setChecked(mDevices.get(position).checkBox);
 
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
@@ -64,7 +64,7 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
         {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                holder.mItem.checkbox = isChecked;
+                holder.mItem.checkBox = isChecked;
             }
         });
 

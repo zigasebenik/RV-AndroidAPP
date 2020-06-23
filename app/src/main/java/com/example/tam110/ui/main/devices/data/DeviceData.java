@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.example.tam110.R;
+import com.example.tam110.ui.main.Data;
 import com.example.tam110.ui.main.devices.DevicesFragment;
 
 import java.util.ArrayList;
@@ -26,18 +27,19 @@ public class DeviceData
     public static void addDevice(Device item)
     {
         ITEMS.add(item);
-        ITEM_MAP.put(item.name, item);
+        ITEM_MAP.put(item.UUID, item);
     }
 
-    public static class Device
+    public static class Device extends Data
     {
-        public final String name;
-        public boolean checkbox;
-
-        public Device(String name)
+        public Device(String UUID, String name, boolean hasSensitivity, boolean checkBox, int UIposition, String fragment)
         {
+            this.UUID = UUID;
             this.name = name;
-            checkbox = false;
+            this.hasSensitivity = hasSensitivity;
+            this.checkBox = checkBox;
+            this.UIposition = UIposition;
+            this.fragment = fragment;
         }
 
         @Override

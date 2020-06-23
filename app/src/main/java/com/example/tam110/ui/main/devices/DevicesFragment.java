@@ -15,16 +15,23 @@ import android.view.ViewGroup;
 import com.example.tam110.R;
 import com.example.tam110.ui.main.devices.data.DeviceData;
 import com.example.tam110.ui.main.devices.data.DeviceData.Device;
+import com.example.tam110.ui.main.lights.LightsFragment;
+import com.example.tam110.ui.main.lights.data.LightsData;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static com.example.tam110.ui.main.devices.data.DeviceData.ITEMS_INITIALIZED;
 import static com.example.tam110.ui.main.devices.data.DeviceData.addDevice;
+import static com.example.tam110.ui.main.lights.data.LightsData.addLight;
 
 public class DevicesFragment extends Fragment
 {
 
+    public static final String UPDATE_DEVICES_UI = "UPDATE_DEVICES_UI";
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
     // TODO: Customize parameters
@@ -82,10 +89,25 @@ public class DevicesFragment extends Fragment
 
             if(ITEMS_INITIALIZED == false)
             {
-                List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Devices));
+                List<String> arrayOfJson = Arrays.asList(this.getResources().getStringArray(R.array.Devices));
 
-                for(int i=0;i<names.size(); i++)
-                    addDevice(new Device(names.get(i)));
+                for(int i=0;i<arrayOfJson.size(); i++)
+                {
+                    JSONObject jsonObject = null;
+                    try
+                    {
+                        jsonObject = new JSONObject(arrayOfJson.get(i).replaceAll("\\s", "|"));
+                        String name = jsonObject.get("name").toString().replaceAll("\\|", " ");
+                        String UUID = jsonObject.get("UUID").toString();
+                        boolean analog = jsonObject.getBoolean("analog");
+
+                        addLight(new LightsData.Light(UUID, name, false, false, i, LightsFragment.class.toString()));
+
+                    } catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
 
                 ITEMS_INITIALIZED = true;
             }

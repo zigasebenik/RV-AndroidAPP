@@ -30,7 +30,13 @@ import android.widget.Toast;
 import androidx.annotation.RequiresApi;
 
 import com.example.tam110.MainActivity;
+import com.example.tam110.ui.main.Data;
+import com.example.tam110.ui.main.devices.DevicesFragment;
+import com.example.tam110.ui.main.devices.data.DeviceData;
+import com.example.tam110.ui.main.lights.LightsFragment;
+import com.example.tam110.ui.main.lights.data.LightsData;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -64,9 +70,7 @@ public class BluetoothWriteReadIntentService extends Service
     private static final int STATE_CONNECTED = 2;
     private final static String TAG = BluetoothWriteReadIntentService.class.getSimpleName();
 
-
-    private int position;
-    private String deviceName;
+    private static final String PIN = "4567983215";
 
 
     private final IBinder binder = new LocalBinder();
@@ -111,7 +115,7 @@ public class BluetoothWriteReadIntentService extends Service
                     //CONNECT to SERVER
                     if (connectionState == STATE_DISCONNECTED)
                     {
-                        bluetoothGatt = device.connectGatt(this, true, bluetoothGattCallback);
+                        bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
                     }
                 }
             }
@@ -141,11 +145,9 @@ public class BluetoothWriteReadIntentService extends Service
         return binder;
     }
 
-    public void sendData(String deviceName, int value)
-    {
-        this.position = value;
-        this.deviceName = deviceName;
 
+    public void sendData(String charcteristicUUID)
+    {
         if (!bluetoothAdapter.isEnabled())
         {
             showToast("Za delovanje je treba prižgati bluetooth.");
@@ -153,8 +155,9 @@ public class BluetoothWriteReadIntentService extends Service
         else if(connectionState == STATE_CONNECTED)
         {
             BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
-            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
-            characteristic.setValue(String.valueOf(position));
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charcteristicUUID));
+            characteristic.setValue(PIN);
+            bluetoothGatt.setCharacteristicNotification(characteristic, true);
             bluetoothGatt.writeCharacteristic(characteristic);
         }
         else if(connectionState == STATE_DISCONNECTED)
@@ -163,11 +166,8 @@ public class BluetoothWriteReadIntentService extends Service
         }
     }
 
-    public void readData(String deviceName, int value)
+    public void sendData(String charcteristicUUID, int sensitivity)
     {
-        this.position = value;
-        this.deviceName = deviceName;
-
         if (!bluetoothAdapter.isEnabled())
         {
             showToast("Za delovanje je treba prižgati bluetooth.");
@@ -175,7 +175,28 @@ public class BluetoothWriteReadIntentService extends Service
         else if(connectionState == STATE_CONNECTED)
         {
             BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
-            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charcteristicUUID));
+            characteristic.setValue(PIN+String.format("%03d", sensitivity));
+            bluetoothGatt.setCharacteristicNotification(characteristic, true);
+            bluetoothGatt.writeCharacteristic(characteristic);
+        }
+        else if(connectionState == STATE_DISCONNECTED)
+        {
+            connectWithServerDevice();
+        }
+    }
+
+    public void readData(String charcteristicUUID)
+    {
+        if (!bluetoothAdapter.isEnabled())
+        {
+            //showToast("Za delovanje je treba prižgati bluetooth.");
+        }
+        else if(connectionState == STATE_CONNECTED)
+        {
+            BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString(charcteristicUUID));
+            bluetoothGatt.setCharacteristicNotification(characteristic, true);
             bluetoothGatt.readCharacteristic(characteristic);
         }
         else if(connectionState == STATE_DISCONNECTED)
@@ -220,9 +241,6 @@ public class BluetoothWriteReadIntentService extends Service
 
     final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback()
     {
-
-
-
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState)
         {
@@ -235,23 +253,29 @@ public class BluetoothWriteReadIntentService extends Service
 
                 //BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
                 //BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
-
-                /*bluetoothGatt.setCharacteristicNotification(characteristic, true);
-                UUID uuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
-                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(uuid);
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                bluetoothGatt.writeDescriptor(descriptor);*/
-
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
-                connectionState = STATE_DISCONNECTED;
-                showToast("Napaka pri povezovanju");
-                Intent alert = new Intent(getBaseContext(), MainActivity.class);
-                alert.setAction(ALERT);
-                alert.addFlags(FLAG_ACTIVITY_NEW_TASK);
-                alert.putExtra(DEVICE_POSITION, "Bluetooth povezava prekinjena.");
-                startActivity(alert);
+                if(connectionState == STATE_DISCONNECTED)
+                {
+                    connectionState = STATE_DISCONNECTED;
+                    //showToast("Napaka pri povezovanju");
+                    Intent alert = new Intent(getBaseContext(), MainActivity.class);
+                    alert.setAction(ALERT);
+                    alert.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    alert.putExtra(DEVICE_POSITION, "Bluetooth povezovanje neuspešno.");
+                    startActivity(alert);
+                }
+                else
+                {
+                    connectionState = STATE_DISCONNECTED;
+                    //showToast("Napaka pri povezovanju");
+                    Intent alert = new Intent(getBaseContext(), MainActivity.class);
+                    alert.setAction(ALERT);
+                    alert.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                    alert.putExtra(DEVICE_POSITION, "Bluetooth povezava prekinjena.");
+                    startActivity(alert);
+                }
             }
         }
 
@@ -260,13 +284,26 @@ public class BluetoothWriteReadIntentService extends Service
         {
             super.onCharacteristicChanged(gatt, characteristic);
             String value = new String(characteristic.getValue());
-            if(value.equals("ON"))
-                showToast(deviceName+" prižgana");
-            else if(value.equals("OFF"))
-                showToast(deviceName+" ugasnjena");
+            Data device = LightsData.ITEM_MAP.get(characteristic.getUuid().toString());
+            if(device == null)
+                device = DeviceData.ITEM_MAP.get(characteristic.getUuid().toString());
 
-            Intent intent = new Intent("UpdateMessageIntent");
-            intent.putExtra(DEVICE_POSITION, position);
+            if(value.equals("ON"))
+            {
+                showToast(device.name+" prižgana");
+            }
+            else if(value.equals("OFF"))
+            {
+                showToast(device.name+" ugasnjena");
+            }
+
+            Intent intent = new Intent();
+            if(device.fragment.equals(LightsFragment.class.toString()))
+                intent.setAction(LightsFragment.UPDATE_LIGHTS_UI);
+            else if(device.fragment.equals(DevicesFragment.class.toString()))
+                intent.setAction(DevicesFragment.UPDATE_DEVICES_UI);
+
+            intent.putExtra(DEVICE_POSITION, device.UIposition);
             intent.putExtra(DATA, new String(characteristic.getValue()));
             sendBroadcast(intent);
         }
@@ -277,8 +314,18 @@ public class BluetoothWriteReadIntentService extends Service
         {
             if (status == BluetoothGatt.GATT_SUCCESS)
             {
-                Intent intent = new Intent("UpdateMessageIntent");
-                intent.putExtra(DEVICE_POSITION, position);
+                String value = new String(characteristic.getValue());
+                Data device = LightsData.ITEM_MAP.get(characteristic.getUuid().toString());
+                if(device == null)
+                    device = DeviceData.ITEM_MAP.get(characteristic.getUuid().toString());
+
+                Intent intent = new Intent();
+                if(device.fragment.equals(LightsFragment.class.toString()))
+                    intent.setAction(LightsFragment.UPDATE_LIGHTS_UI);
+                else if(device.fragment.equals(DevicesFragment.class.toString()))
+                    intent.setAction(DevicesFragment.UPDATE_DEVICES_UI);
+
+                intent.putExtra(DEVICE_POSITION, device.UIposition);
                 intent.putExtra(DATA, new String(characteristic.getValue()));
                 sendBroadcast(intent);
             }

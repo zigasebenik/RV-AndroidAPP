@@ -1,10 +1,8 @@
 package com.example.tam110.ui.main.lights;
 
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -13,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tam110.MainActivity;
 import com.example.tam110.R;
-import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentService;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
 
 import java.util.List;
@@ -70,9 +67,15 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-
                 holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
-                mainActivity.sendData(holder.mNameView.getText().toString(), position);
+
+                if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == false)
+                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString(), 255);
+                else if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == true)
+                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString(), 0);
+                else
+                    mainActivity.sendData(mLights.get(position).UUID, holder.mNameView.getText().toString());
+
             }
         });
 

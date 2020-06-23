@@ -22,6 +22,10 @@ import com.example.tam110.communication.bluetooth.BluetoothWriteReadIntentServic
 import com.example.tam110.ui.main.lights.data.LightsData;
 import com.example.tam110.ui.main.lights.data.LightsData.Light;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +38,7 @@ public class LightsFragment extends Fragment
 
     // TODO: Customize parameter argument names
     private static final String ARG_COLUMN_COUNT = "column-count";
+    public static final String UPDATE_LIGHTS_UI = "UPDATE_LIGHTS_UI";
     // TODO: Customize parameters
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
@@ -96,19 +101,26 @@ public class LightsFragment extends Fragment
 
             if(ITEMS_INITIALIZED == false)
             {
-                List<String> names = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
+                List<String> arrayOfJson = Arrays.asList(this.getResources().getStringArray(R.array.Lights));
 
-                handler.postDelayed(new UpdateUIReadValues(names), 75);
+                //handler.postDelayed(new UpdateUIReadValues(names), 75);
 
-                for(int i=0;i<names.size(); i++)
+                for(int i=0;i<arrayOfJson.size(); i++)
                 {
-                    String name = names.get(i);
-                    mainActivity.readData(name,i);
+                    JSONObject jsonObject = null;
+                    try
+                    {
+                        jsonObject = new JSONObject(arrayOfJson.get(i).replaceAll("\\s", "|"));
+                        String name = jsonObject.get("name").toString().replaceAll("\\|", " ");
+                        String UUID = jsonObject.get("UUID").toString();
+                        boolean analog = jsonObject.getBoolean("analog");
 
-                    if(i < 2)
-                        addLight(new LightsData.Light(name, true, false));
-                    else
-                        addLight(new LightsData.Light(name, false, false));
+                        addLight(new LightsData.Light(UUID, name, analog, false, i, LightsFragment.class.toString()));
+
+                    } catch (JSONException e)
+                    {
+                        e.printStackTrace();
+                    }
                 }
 
                 ITEMS_INITIALIZED = true;
@@ -140,7 +152,7 @@ public class LightsFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(receiver, new IntentFilter("UpdateMessageIntent"));
+        getActivity().registerReceiver(receiver, new IntentFilter(UPDATE_LIGHTS_UI));
     }
     @Override
     public void onPause() {
@@ -209,7 +221,7 @@ public class LightsFragment extends Fragment
             @Override
             public void run()
             {
-                mainActivity.readData(name, position);
+                mainActivity.readData(name, name);
             }
         }
     }
