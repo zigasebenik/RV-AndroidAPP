@@ -116,13 +116,14 @@ public class LightsFragment extends Fragment
                         boolean analog = jsonObject.getBoolean("analog");
 
                         addLight(new LightsData.Light(UUID, name, analog, false, i, LightsFragment.class.toString()));
-                        handler.postDelayed(new ReadCharacteristic(UUID), 500*i);
+                        //handler.postDelayed(new ReadCharacteristic(UUID), 500*i);
 
                     } catch (JSONException e)
                     {
                         e.printStackTrace();
                     }
                 }
+                //mainActivity.updateLightsUI();
 
                 ITEMS_INITIALIZED = true;
             }

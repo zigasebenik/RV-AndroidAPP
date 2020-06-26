@@ -78,6 +78,8 @@ public class BluetoothWriteReadIntentService extends Service
     boolean startBonding = false;
 
     private final IBinder binder = new LocalBinder();
+    final Handler handler = new Handler();
+
 
     @Override
     public void onCreate()
@@ -104,6 +106,7 @@ public class BluetoothWriteReadIntentService extends Service
     public void connectWithServerDevice()
     {
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
         boolean serverPaired = false;
 
         if (pairedDevices.size() > 0)
@@ -136,6 +139,7 @@ public class BluetoothWriteReadIntentService extends Service
     {
         super.onDestroy();
     }
+
 
     public class LocalBinder extends Binder
     {
@@ -247,7 +251,6 @@ public class BluetoothWriteReadIntentService extends Service
         }
     };
 
-
     final BluetoothGattCallback bluetoothGattCallback = new BluetoothGattCallback()
     {
         @Override
@@ -260,8 +263,19 @@ public class BluetoothWriteReadIntentService extends Service
                 Log.i(TAG, "Connected to GATT server.");
                 Log.i(TAG, "Attempting to start service discovery:" + bluetoothGatt.discoverServices());
                 startBonding = false;
+
+
+                // TO UPDATE UI FROM SERVER VALUES
+                handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
+                /*for(int i=0;i<LightsData.ITEMS.size();i++)
+                    handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(i).UUID), 300*i);
+
+                for(int i=0;i<DeviceData.ITEMS.size();i++)
+                    handler.postDelayed(new ReadCharacteristic(DeviceData.ITEMS.get(i).UUID), LightsData.ITEMS.size()*300+300*i);*/
+
                 //BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
                 //BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
+
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
@@ -323,22 +337,63 @@ public class BluetoothWriteReadIntentService extends Service
         {
             if (status == BluetoothGatt.GATT_SUCCESS)
             {
-                String value = new String(characteristic.getValue());
                 Data device = LightsData.ITEM_MAP.get(characteristic.getUuid().toString());
                 if(device == null)
                     device = DeviceData.ITEM_MAP.get(characteristic.getUuid().toString());
 
                 Intent intent = new Intent();
+
+                int nextReadPosition = device.UIposition+1;
+
                 if(device.fragment.equals(LightsFragment.class.toString()))
+                {
+                    if(nextReadPosition == LightsData.ITEMS.size())
+                    {
+                        nextReadPosition = 0;
+                        updateLightsUI = false;
+                        updateDevicesUI = true;
+                    }
                     intent.setAction(LightsFragment.UPDATE_LIGHTS_UI);
+                }
                 else if(device.fragment.equals(DevicesFragment.class.toString()))
+                {
+                    if(nextReadPosition == DeviceData.ITEMS.size())
+                    {
+                        nextReadPosition = 0;
+                        updateLightsUI = false;
+                        updateDevicesUI = false;
+                        finishedUpdatingUI = true;
+                    }
                     intent.setAction(DevicesFragment.UPDATE_DEVICES_UI);
+                }
+
+                if(finishedUpdatingUI == false && updateLightsUI == true)
+                    readData(LightsData.ITEMS.get(nextReadPosition).UUID);
+                else if(finishedUpdatingUI == false && updateDevicesUI == true)
+                    readData(DeviceData.ITEMS.get(nextReadPosition).UUID);
 
                 intent.putExtra(DEVICE_POSITION, device.UIposition);
                 intent.putExtra(DATA, new String(characteristic.getValue()));
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
 
             }
+        }
+
+        boolean updateLightsUI = true;
+        boolean updateDevicesUI = false;
+        boolean finishedUpdatingUI = false;
+
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status)
+        {
+            super.onServicesDiscovered(gatt, status);
+            /*for(int i=0;i<LightsData.ITEMS.size();i++)
+                handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(i).UUID), 100*i);
+
+            for(int i=0;i<DeviceData.ITEMS.size();i++)
+                handler.postDelayed(new ReadCharacteristic(DeviceData.ITEMS.get(i).UUID), LightsData.ITEMS.size()*100+100*i);*/
+            handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
         }
     };
 
@@ -395,5 +450,16 @@ public class BluetoothWriteReadIntentService extends Service
         }
 
     }
+    public class ReadCharacteristic implements Runnable {
+        private String UUIDofDevice;
+        public ReadCharacteristic(String UUID) {
+            this.UUIDofDevice = UUID;
+        }
 
+        @Override
+        public void run()
+        {
+            readData(UUIDofDevice);
+        }
+    }
 }

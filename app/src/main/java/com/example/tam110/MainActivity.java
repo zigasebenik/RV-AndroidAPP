@@ -56,8 +56,8 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         TabLayout tabs = findViewById(R.id.tabs);
         tabs.setupWithViewPager(viewPager);
 
-        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        this.registerReceiver(mReceiver, filter);
+
+
 
         if (this.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
@@ -81,12 +81,15 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         startActivityForResult(enableBtIntent, BluetoothWriteReadIntentService.REQUEST_ENABLE_BT);
+        IntentFilter filter = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        this.registerReceiver(mReceiver, filter);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         unbindService(connection);
+        unregisterReceiver(mReceiver);
         mBound = false;
     }
 
@@ -154,7 +157,6 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
     protected void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(mReceiver);
     }
 
     @Override
@@ -172,6 +174,7 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == BluetoothWriteReadIntentService.REQUEST_ENABLE_BT)
         {
             if (resultCode == RESULT_OK)
@@ -250,6 +253,5 @@ public class MainActivity extends AppCompatActivity implements DevicesFragment.O
         if(mBound == true)
             mService.sendData(charcteristicUUID, sensitivity);
     }
-
 
 }

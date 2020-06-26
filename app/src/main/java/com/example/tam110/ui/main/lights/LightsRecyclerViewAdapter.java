@@ -68,7 +68,7 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             @Override
             public void onClick(View v)
             {
-                //holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
+                holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
 
                 if(holder.mItem.hasSensitivity == true && holder.mItem.checkBox == false)
                     mainActivity.sendData(mLights.get(position).UUID, 255);
