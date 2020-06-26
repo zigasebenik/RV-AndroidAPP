@@ -311,20 +311,33 @@ public class BluetoothWriteReadIntentService extends Service
             if(device == null)
                 device = DeviceData.ITEM_MAP.get(characteristic.getUuid().toString());
 
-            if(value.equals("ON"))
-            {
-                showToast(device.name+" prižgana");
-            }
-            else if(value.equals("OFF"))
-            {
-                showToast(device.name+" ugasnjena");
-            }
+
 
             Intent intent = new Intent();
             if(device.fragment.equals(LightsFragment.class.toString()))
+            {
                 intent.setAction(LightsFragment.UPDATE_LIGHTS_UI);
+                if(value.equals("ON"))
+                {
+                    showToast(device.name+" prižgana");
+                }
+                else if(value.equals("OFF"))
+                {
+                    showToast(device.name+" ugasnjena");
+                }
+            }
             else if(device.fragment.equals(DevicesFragment.class.toString()))
+            {
                 intent.setAction(DevicesFragment.UPDATE_DEVICES_UI);
+                if(value.equals("ON"))
+                {
+                    showToast(device.name+" prižgan");
+                }
+                else if(value.equals("OFF"))
+                {
+                    showToast(device.name+" ugasnjen");
+                }
+            }
 
             intent.putExtra(DEVICE_POSITION, device.UIposition);
             intent.putExtra(DATA, new String(characteristic.getValue()));

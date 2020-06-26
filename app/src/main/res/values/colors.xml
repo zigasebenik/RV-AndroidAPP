@@ -5,4 +5,7 @@
     <color name="colorAccent">#27DA2A</color>
     <color name="colorSecondary">#858585</color>
     <color name="colorSecondaryDark">#3A3A3A</color>
+
+    <color name="ON">#27DA2A</color>
+    <color name="OFF">#EF2727</color>
 </resources>

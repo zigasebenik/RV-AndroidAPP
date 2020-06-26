@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Tam - 110</string>
+    <string name="app_name">TAM - 110</string>
     <!-- Strings related to login -->
     <string name="prompt_email">Uporabniško ime</string>
     <string name="prompt_password">Geslo</string>
@@ -12,7 +12,6 @@
 
     <string name="tab_text_1">Luči</string>
     <string name="tab_text_2">Naprave</string>
-    <string name="spalnica">Spalnica</string>
     <string name="title_activity_main">MainActivity</string>
 
     <string name="motorButtonUP">GOR</string>

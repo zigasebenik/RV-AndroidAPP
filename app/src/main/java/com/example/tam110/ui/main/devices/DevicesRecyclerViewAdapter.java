@@ -70,6 +70,7 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
             @Override
             public void onClick(View v)
             {
+                holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
                 mainActivity.sendData(mDevices.get(position).UUID);
             }
         });
