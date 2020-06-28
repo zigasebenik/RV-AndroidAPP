@@ -11,6 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:max="255"
+        android:progress="255"
         android:progressTint="@color/ON"
         android:thumbTint="@color/ON"
         app:layout_constraintEnd_toStartOf="@+id/lightToggleButton"

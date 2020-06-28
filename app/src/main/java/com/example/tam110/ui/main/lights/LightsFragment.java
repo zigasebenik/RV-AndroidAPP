@@ -169,14 +169,42 @@ public class LightsFragment extends Fragment
             String value = intent.getStringExtra(BluetoothWriteReadIntentService.DATA);
             int position = intent.getIntExtra(BluetoothWriteReadIntentService.DEVICE_POSITION, -1);
 
-            if(value.equals("ON"))
-                LightsData.ITEMS.get(position).checkBox = true;
-            else if(value.equals("OFF"))
-                LightsData.ITEMS.get(position).checkBox = false;
+            int sensitivity = stringToInt(value);
 
-            viewAdapter.notifyItemChanged(position);
+            if(value.equals("ON"))
+            {
+                LightsData.ITEMS.get(position).checkBox = true;
+                viewAdapter.notifyItemChanged(position);
+            }
+            else if(value.equals("OFF"))
+            {
+                LightsData.ITEMS.get(position).checkBox = false;
+                viewAdapter.notifyItemChanged(position);
+            }
+            else if(sensitivity > 0 && sensitivity != -1)
+            {
+                LightsData.ITEMS.get(position).checkBox = true;
+                if(sensitivity == 255)
+                    viewAdapter.notifyItemChanged(position);
+
+                if(LightsData.ITEMS.get(position).init == false)
+                {
+                    LightsData.ITEMS.get(position).init = true;
+                    viewAdapter.notifyItemChanged(position);
+                }
+            }
+
+
         }
     };
+
+    public static int stringToInt(String param) {
+        try {
+            return Integer.valueOf(param);
+        } catch(NumberFormatException e) {
+            return -1;
+        }
+    }
 
     @Override
     public void onDetach()

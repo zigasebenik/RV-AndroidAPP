@@ -76,6 +76,7 @@ public class BluetoothWriteReadIntentService extends Service
 
     boolean startScanning = false;
     boolean startBonding = false;
+    boolean showConnectingToast = true;
 
     private final IBinder binder = new LocalBinder();
     final Handler handler = new Handler();
@@ -123,6 +124,11 @@ public class BluetoothWriteReadIntentService extends Service
                     //CONNECT to SERVER
                     if (connectionState == STATE_DISCONNECTED)
                     {
+                        if(showConnectingToast == true)
+                        {
+                            showToast("Povezujem z server napravo.");
+                            showConnectingToast = false;
+                        }
                         bluetoothGatt = device.connectGatt(this, false, bluetoothGattCallback);
                     }
                 }
@@ -264,21 +270,18 @@ public class BluetoothWriteReadIntentService extends Service
                 Log.i(TAG, "Attempting to start service discovery:" + bluetoothGatt.discoverServices());
                 startBonding = false;
 
+                showConnectingToast = false;
+
 
                 // TO UPDATE UI FROM SERVER VALUES
-                handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
-                /*for(int i=0;i<LightsData.ITEMS.size();i++)
-                    handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(i).UUID), 300*i);
+                //handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
 
-                for(int i=0;i<DeviceData.ITEMS.size();i++)
-                    handler.postDelayed(new ReadCharacteristic(DeviceData.ITEMS.get(i).UUID), LightsData.ITEMS.size()*300+300*i);*/
-
-                //BluetoothGattService service = bluetoothGatt.getService(UUID.fromString("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
-                //BluetoothGattCharacteristic characteristic = service.getCharacteristic(UUID.fromString("beb5483e-36e1-4688-b7f5-ea07361b26a8"));
 
             }
             else if (newState == BluetoothProfile.STATE_DISCONNECTED)
             {
+                showConnectingToast = true;
+
                 if(connectionState == STATE_DISCONNECTED)
                 {
                     connectionState = STATE_DISCONNECTED;
@@ -406,7 +409,11 @@ public class BluetoothWriteReadIntentService extends Service
 
             for(int i=0;i<DeviceData.ITEMS.size();i++)
                 handler.postDelayed(new ReadCharacteristic(DeviceData.ITEMS.get(i).UUID), LightsData.ITEMS.size()*100+100*i);*/
-            handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
+
+
+            //handler.postDelayed(new ReadCharacteristic(LightsData.ITEMS.get(0).UUID), 10);
+
+            readData(LightsData.ITEMS.get(0).UUID);
         }
     };
 

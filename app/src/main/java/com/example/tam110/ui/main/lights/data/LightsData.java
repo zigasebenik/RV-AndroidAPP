@@ -33,6 +33,7 @@ public class LightsData
             this.checkBox = checkBox;
             this.UIposition = UIposition;
             this.fragment = fragment;
+            this.init = false;
         }
 
         @Override

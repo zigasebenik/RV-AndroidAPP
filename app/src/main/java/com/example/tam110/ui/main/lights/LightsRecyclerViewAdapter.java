@@ -1,6 +1,7 @@
 package com.example.tam110.ui.main.lights;
 
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,6 +82,31 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             }
         });
 
+        holder.mSeekBarView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+            {
+                if(holder.mItem.hasSensitivity == true && progress != 0)
+                {
+                    Log.i("SEEKBAR", "value: "+((progress/17)*17));
+                    mainActivity.sendData(mLights.get(position).UUID, Math.max((progress/17)*17,1));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar)
+            {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar)
+            {
+
+            }
+        });
+
         holder.mToggleButtonView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
@@ -121,6 +147,7 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             mNameView = (TextView) view.findViewById(R.id.lightName);
             mToggleButtonView = (ToggleButton) view.findViewById(R.id.lightToggleButton);
             mSeekBarView = (SeekBar) view.findViewById(R.id.lightSeekBar);
+
         }
 
         @Override

@@ -8,4 +8,5 @@ public abstract class Data
     public String UUID;
     public int UIposition;
     public String fragment;
+    public boolean init;
 }
