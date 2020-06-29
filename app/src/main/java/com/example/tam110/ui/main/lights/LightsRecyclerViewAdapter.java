@@ -82,6 +82,7 @@ public class LightsRecyclerViewAdapter extends RecyclerView.Adapter<LightsRecycl
             }
         });
 
+        holder.mSeekBarView.setProgress(255);
         holder.mSeekBarView.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
         {
             @Override

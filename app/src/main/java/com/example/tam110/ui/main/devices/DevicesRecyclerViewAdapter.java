@@ -1,5 +1,6 @@
 package com.example.tam110.ui.main.devices;
 
+import android.content.DialogInterface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.tam110.MainActivity;
@@ -71,7 +73,28 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
             public void onClick(View v)
             {
                 holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
-                mainActivity.sendData(mDevices.get(position).UUID);
+
+                String msg = "Ali ste prepričani da želite ";
+
+                if(holder.mItem.checkBox == true)
+                    msg+="ugasniti "+holder.mItem.name+".";
+                else
+                    msg+="prižgati "+holder.mItem.name+".";
+
+                final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+                builder.setTitle("TAM - 110");
+                builder.setMessage(msg);
+                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        mainActivity.sendData(mDevices.get(position).UUID);
+                    }
+                });
+                builder.setNegativeButton(android.R.string.cancel, null);
+                //builder.setOnCancelListener(android.R.string.cancel, null)
+                builder.show();
             }
         });
     }
