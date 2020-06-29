@@ -75,16 +75,23 @@ public class DevicesRecyclerViewAdapter extends RecyclerView.Adapter<DevicesRecy
                 holder.mToggleButtonView.setChecked(holder.mToggleButtonView.isChecked() ? false : true);
 
                 String msg = "Ali ste prepričani da želite ";
+                String button;
 
                 if(holder.mItem.checkBox == true)
+                {
                     msg+="ugasniti "+holder.mItem.name+".";
+                    button = "ugasni";
+                }
                 else
+                {
                     msg+="prižgati "+holder.mItem.name+".";
+                    button = "prižgi";
+                }
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
                 builder.setTitle("TAM - 110");
                 builder.setMessage(msg);
-                builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener()
+                builder.setPositiveButton(button, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, int which)
